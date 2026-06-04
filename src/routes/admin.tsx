@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import imageCompression from "browser-image-compression";
 import {
   createAdminUser,
   deleteAdminUser,
@@ -390,24 +391,45 @@ function ProductForm({
 
   async function uploadImage(file: File) {
     setUploading(true);
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `${crypto.randomUUID()}.${ext}`;
     
-    // Faz o upload no bucket "product-images"
-    const { error } = await supabase.storage.from("product-images").upload(path, file, { upsert: false });
-    if (error) { toast.error(error.message); setUploading(false); return; }
-    
-    // ALTERAÇÃO: Gera uma URL Pública permanente em vez de uma URL com validade
-    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+    try {
+      // 1. Configura a compressão da imagem
+      const options = {
+        maxSizeMB: 0.3, // Limite de 300KB
+        maxWidthOrHeight: 1200, // Excelente resolução para web
+        useWebWorker: true,
+      };
+      
+      // 2. Executa a compressão
+      const compressedFile = await imageCompression(file, options);
+      
+      const ext = compressedFile.name.split(".").pop() || "jpg";
+      const path = `${crypto.randomUUID()}.${ext}`;
+      
+      // 3. Faz o upload da imagem já comprimida para o Supabase
+      const { error } = await supabase.storage.from("product-images").upload(path, compressedFile, { upsert: false });
+      if (error) { 
+        toast.error(error.message); 
+        setUploading(false); 
+        return; 
+      }
+      
+      // 4. Gera a URL pública permanente
+      const { data } = supabase.storage.from("product-images").getPublicUrl(path);
 
-    if (!data?.publicUrl) {
-      toast.error("Falha ao gerar URL da imagem");
+      if (!data?.publicUrl) {
+        toast.error("Falha ao gerar URL da imagem");
+        setUploading(false);
+        return;
+      }
+      
+      setImageUrl(data.publicUrl);
+    } catch (error) {
+      console.error("Erro na compressão:", error);
+      toast.error("Erro ao processar a imagem.");
+    } finally {
       setUploading(false);
-      return;
     }
-    
-    setImageUrl(data.publicUrl);
-    setUploading(false);
   }
 
   async function save(e: React.FormEvent) {
