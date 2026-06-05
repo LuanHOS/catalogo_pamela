@@ -98,9 +98,13 @@ function Index() {
       "",
       `*Total: ${brl(total)}*`,
       "",
-      "Obrigada!",
+      "Obrigado!",
     ];
     window.open(whatsappLink(lines.join("\n"), whatsNumber), "_blank");
+    
+    // LINHAS ADICIONADAS: Limpa o carrinho e fecha a gaveta lateral
+    cart.clear();
+    setCartOpen(false);
   }
 
   return (
