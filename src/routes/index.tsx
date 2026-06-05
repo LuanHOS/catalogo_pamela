@@ -97,8 +97,6 @@ function Index() {
       }),
       "",
       `*Total: ${brl(total)}*`,
-      "",
-      "Obrigado!",
     ];
     window.open(whatsappLink(lines.join("\n"), whatsNumber), "_blank");
     
