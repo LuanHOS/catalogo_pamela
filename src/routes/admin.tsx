@@ -788,7 +788,7 @@ function SettingsPanel() {
     try {
       const res = await save({ data: { number } });
       setNumber(res.number);
-      toast.success("Número do WhatsApp updated");
+      toast.success("Número do WhatsApp atualizado");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro");
     } finally {
