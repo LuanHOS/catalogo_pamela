@@ -100,7 +100,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 function LoginForm() {
-  const [email, setEmail] = useState("admin");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -788,7 +788,7 @@ function SettingsPanel() {
     try {
       const res = await save({ data: { number } });
       setNumber(res.number);
-      toast.success("Número do WhatsApp atualizado");
+      toast.success("Número do WhatsApp updated");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro");
     } finally {
